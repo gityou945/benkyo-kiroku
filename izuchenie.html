@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>изучение</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0E1826;
+    --bg-raised:#16223A;
+    --bg-raised2:#1C2A45;
+    --ink:#E7EAF2;
+    --ink-soft:#8F9CB5;
+    --line: rgba(231,234,242,0.10);
+    --line-strong: rgba(231,234,242,0.18);
+    --accent:#7093CB;       /* スチールブルー */
+    --accent-deep:#4C6DA0;
+    --gold:#C6A868;         /* シックな差し色 */
+    --green:#5F9A80;
+    --amber:#CBA43F;
+    --red:#B5604A;
+    --shadow: 0 1px 0 rgba(0,0,0,0.35), 0 10px 26px rgba(0,0,0,0.45);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Zen Kaku Gothic New', sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    background-image:
+      radial-gradient(rgba(112,147,203,0.06) 1px, transparent 1px);
+    background-size:16px 16px;
+  }
+  .display{font-family:'Shippori Mincho', serif;}
+  .logo-font{font-family:'Cormorant Garamond', serif; font-style:italic;}
+
+  #app{max-width:560px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding-bottom:84px;}
+
+  header.top{
+    padding:30px 20px 16px;
+    position:relative;
+    border-bottom:1px solid var(--line);
+  }
+  header.top .stamp{
+    position:absolute; top:26px; right:20px;
+    width:44px;height:44px;border-radius:50%;
+    border:1px solid var(--gold);
+    color:var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Cormorant Garamond',serif;
+    font-size:20px; font-weight:600;
+    opacity:0.9;
+  }
+  header.top h1.logo-font{
+    font-size:34px; margin:0; letter-spacing:.02em; font-weight:600; color:var(--ink);
+  }
+  header.top .tagline{
+    color:var(--ink-soft); font-size:12.5px; letter-spacing:.08em; margin-top:2px;
+  }
+  header.top .date{
+    color:var(--ink-soft); font-size:12px; letter-spacing:.03em; margin-top:10px;
+  }
+
+  nav.tabs{
+    display:flex; gap:2px; padding:0 12px; margin-top:4px; overflow-x:auto;
+  }
+  nav.tabs button{
+    flex:1; padding:11px 2px; border:none; background:transparent;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:12.5px; font-weight:700;
+    color:var(--ink-soft); cursor:pointer; border-bottom:2px solid transparent;
+    letter-spacing:.02em; white-space:nowrap;
+  }
+  nav.tabs button.active{color:var(--ink); border-bottom-color:var(--accent);}
+
+  main{padding:18px 16px 8px; flex:1;}
+
+  section.view{display:none;}
+  section.view.active{display:block;}
+
+  .empty{
+    text-align:center; padding:56px 20px; color:var(--ink-soft);
+  }
+  .empty .glyph{font-size:30px; display:block; margin-bottom:10px; font-family:'Cormorant Garamond',serif; color:var(--gold); font-style:italic;}
+
+  /* 今日：復習カード */
+  .review-card{
+    background:var(--bg-raised);
+    border:1px solid var(--line);
+    border-radius:6px;
+    box-shadow:var(--shadow);
+    margin-bottom:12px;
+    overflow:hidden;
+  }
+  .review-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px; cursor:pointer;
+  }
+  .review-head .topic-name{font-size:16px; font-weight:700;}
+  .review-head .meta{font-size:12px; color:var(--ink-soft); margin-top:3px;}
+  .subj-part{color:var(--gold); font-weight:700;}
+  .topic-part{font-weight:700;}
+  .topic-part-paren{font-weight:400; color:var(--ink-soft); font-size:.92em;}
+  .subject-tag{
+    display:inline-block; font-size:11px; padding:2px 8px; border-radius:10px;
+    background:rgba(198,168,104,0.14); color:var(--gold); font-weight:700; margin-right:6px;
+  }
+  .review-head .chevron{color:var(--ink-soft); font-size:13px; transition:transform .2s;}
+  .review-card.open .chevron{transform:rotate(90deg);}
+
+  .review-body{
+    display:none; padding:0 16px 16px; border-top:1px dashed var(--line);
+  }
+  .review-card.open .review-body{display:block;}
+  .review-card.revealed .prompt-veil{display:none;}
+  .review-card:not(.revealed) .memo-list{display:none;}
+
+  .prompt-veil{
+    padding:14px 0 6px; text-align:center;
+  }
+  .prompt-veil p{color:var(--ink-soft); font-size:13px; margin:0 0 10px;}
+  .btn-recall{
+    background:var(--accent); color:#0E1826; border:none; border-radius:3px;
+    padding:9px 18px; font-family:'Zen Kaku Gothic New',sans-serif; font-weight:700;
+    font-size:13px; letter-spacing:.05em; cursor:pointer;
+  }
+  .btn-recall:active{opacity:.8;}
+
+  .memo-list{padding-top:10px;}
+  .memo-item{
+    padding:9px 0; border-bottom:1px solid var(--line);
+    font-size:13.5px; line-height:1.6;
+  }
+  .memo-item:last-child{border-bottom:none;}
+  .memo-item .memo-date{font-size:11px; color:var(--gold); font-weight:700; margin-bottom:2px; letter-spacing:.03em;}
+  .memo-item .memo-material{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+  .entry-schedule{
+    display:flex; align-items:center; gap:8px; margin-top:8px; padding-top:8px;
+    border-top:1px dashed var(--line); font-size:11.5px; color:var(--ink-soft);
+  }
+  .entry-schedule input[type="date"]{
+    background:var(--bg); border:1px solid var(--line-strong); color:var(--ink);
+    border-radius:2px; padding:3px 6px; font-size:11.5px; font-family:'Zen Kaku Gothic New',sans-serif;
+  }
+  .entry-schedule .entry-delete{
+    margin-left:auto; background:none; border:none; color:var(--red); font-size:11.5px;
+    text-decoration:underline; cursor:pointer; font-family:'Zen Kaku Gothic New',sans-serif;
+  }
+
+  .assess-row{
+    display:flex; gap:8px; margin-top:14px;
+  }
+  .assess-row button{
+    flex:1; padding:10px 4px; border-radius:3px; border:1px solid var(--line-strong);
+    background:var(--bg); font-family:'Zen Kaku Gothic New',sans-serif;
+    font-size:12.5px; font-weight:700; cursor:pointer; color:var(--ink);
+  }
+  .assess-row button.good{border-color:var(--green); color:var(--green);}
+  .assess-row button.soso{border-color:var(--amber); color:var(--amber);}
+  .assess-row button.forgot{border-color:var(--red); color:var(--red);}
+  .assess-row button:active{transform:scale(.97);}
+
+  .done-badge{
+    display:inline-block; font-size:11px; font-weight:700; padding:2px 8px;
+    border-radius:10px; margin-left:8px;
+  }
+  .done-badge.good{background:rgba(95,154,128,.16); color:var(--green);}
+  .done-badge.soso{background:rgba(203,164,63,.16); color:var(--amber);}
+  .done-badge.forgot{background:rgba(181,96,74,.16); color:var(--red);}
+
+  h2.section-title{
+    font-family:'Shippori Mincho',serif; font-size:14.5px; font-weight:700;
+    color:var(--ink-soft); margin:22px 0 10px; letter-spacing:.08em;
+    display:flex; align-items:center; gap:8px;
+  }
+  h2.section-title:first-child{margin-top:2px;}
+  h2.section-title::after{content:"";flex:1;height:1px;background:var(--line);}
+
+  /* 論点一覧 */
+  .topic-row{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:6px;
+    padding:12px 14px; margin-bottom:9px; cursor:pointer; box-shadow:var(--shadow);
+  }
+  .topic-row .row-top{display:flex; justify-content:space-between; align-items:baseline;}
+  .topic-row .topic-name{font-weight:700; font-size:15px;}
+  .topic-row .next-date{font-size:11.5px; color:var(--ink-soft);}
+  .topic-row .row-sub{display:flex; justify-content:space-between; margin-top:5px;}
+  .topic-total-time{font-size:11px; color:var(--accent); font-weight:700;}
+  .search-bar{
+    width:100%; padding:11px 14px; border:1px solid var(--line-strong); border-radius:3px;
+    background:var(--bg-raised); font-family:'Zen Kaku Gothic New',sans-serif; font-size:14px;
+    margin-bottom:14px; color:var(--ink);
+  }
+  .search-bar:focus{outline:none; border-color:var(--accent);}
+  .search-bar::placeholder{color:var(--ink-soft);}
+
+  /* 統計 */
+  .stat-grid{display:flex; gap:10px; margin-bottom:20px;}
+  .stat-box{
+    flex:1; background:var(--bg-raised); border:1px solid var(--line); border-radius:6px;
+    padding:14px 10px; text-align:center; box-shadow:var(--shadow);
+  }
+  .stat-box .num{font-family:'Shippori Mincho',serif; font-size:22px; font-weight:700; color:var(--accent);}
+  .stat-box .label{font-size:11px; color:var(--ink-soft); margin-top:2px;}
+
+  .heatmap{display:grid; grid-template-columns:repeat(14,1fr); gap:4px; margin-bottom:8px;}
+  .heat-cell{aspect-ratio:1; border-radius:2px; background:rgba(231,234,242,0.06);}
+  .heat-cell[data-level="1"]{background:rgba(112,147,203,0.28);}
+  .heat-cell[data-level="2"]{background:rgba(112,147,203,0.5);}
+  .heat-cell[data-level="3"]{background:rgba(112,147,203,0.75);}
+  .heat-cell[data-level="4"]{background:rgba(112,147,203,1);}
+  .heat-caption{font-size:11px; color:var(--ink-soft); text-align:right;}
+
+  .ranking-row{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 0; border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .ranking-row:last-child{border-bottom:none;}
+  .ranking-row .r-name{font-weight:700;}
+  .ranking-row .r-time{color:var(--gold); font-weight:700; font-size:12.5px;}
+
+  /* カレンダー */
+  .cal-nav{display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;}
+  .cal-nav button{
+    background:var(--bg-raised); border:1px solid var(--line-strong); color:var(--ink);
+    width:34px; height:34px; border-radius:50%; cursor:pointer; font-size:15px;
+  }
+  .cal-nav .cal-label{font-family:'Shippori Mincho',serif; font-size:16px; font-weight:700; letter-spacing:.05em;}
+  .cal-grid{display:grid; grid-template-columns:repeat(7,1fr); gap:5px; margin-bottom:6px;}
+  .cal-dow{text-align:center; font-size:11px; color:var(--ink-soft); padding-bottom:4px;}
+  .cal-cell{
+    aspect-ratio:1; border-radius:6px; border:1px solid var(--line);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    cursor:pointer; position:relative; background:var(--bg-raised);
+    font-size:12.5px; color:var(--ink);
+  }
+  .cal-cell.blank{visibility:hidden; cursor:default;}
+  .cal-cell.has-entry{background:rgba(112,147,203,0.18); border-color:rgba(112,147,203,0.4);}
+  .cal-cell.today{border-color:var(--gold); border-width:2px;}
+  .cal-cell.selected{background:var(--accent); color:#0E1826; font-weight:700;}
+  .cal-cell .dot-row{display:flex; gap:2px; margin-top:2px;}
+  .cal-cell .dot{width:4px;height:4px;border-radius:50%;background:var(--accent);}
+  .cal-cell .dot-due{background:var(--gold);}
+  .cal-cell .dot-forecast{background:transparent; border:1px solid var(--gold); width:3px; height:3px;}
+  .cal-cell.selected .dot{background:#0E1826;}
+  .cal-cell.selected .dot-due{background:#0E1826;}
+  .cal-cell.selected .dot-forecast{border-color:#0E1826;}
+
+  .cal-detail{
+    margin-top:16px; background:var(--bg-raised); border:1px solid var(--line); border-radius:6px;
+    padding:14px 16px; box-shadow:var(--shadow);
+  }
+  .cal-detail .cal-detail-date{font-family:'Shippori Mincho',serif; font-weight:700; font-size:15px; margin-bottom:2px;}
+  .cal-detail .cal-detail-total{font-size:12px; color:var(--gold); margin-bottom:10px;}
+  .cal-entry{padding:8px 0; border-bottom:1px solid var(--line); font-size:13px; line-height:1.6;}
+  .cal-entry:last-child{border-bottom:none;}
+  .cal-entry .ce-head{display:flex; justify-content:space-between; font-weight:700;}
+  .cal-entry .ce-time{color:var(--ink-soft); font-weight:400; font-size:11.5px;}
+  .cal-entry .ce-text{color:var(--ink-soft); margin-top:2px;}
+
+  /* FAB */
+  .fab{
+    position:fixed; right:20px; bottom:24px; width:56px; height:56px; border-radius:50%;
+    background:var(--accent); color:#0E1826; border:none; font-size:26px; box-shadow:0 10px 24px rgba(112,147,203,0.35);
+    cursor:pointer; z-index:20;
+  }
+  .fab:active{transform:scale(.94);}
+
+  /* モーダル */
+  .modal-backdrop{
+    position:fixed; inset:0; background:rgba(4,7,14,0.6); display:none;
+    align-items:flex-end; justify-content:center; z-index:50;
+  }
+  .modal-backdrop.open{display:flex;}
+  .modal{
+    background:var(--bg-raised2); width:100%; max-width:560px; border-radius:14px 14px 0 0;
+    padding:22px 20px 26px; max-height:88vh; overflow-y:auto;
+    box-shadow:0 -10px 34px rgba(0,0,0,0.5);
+    border-top:1px solid var(--line-strong);
+  }
+  .modal h3{font-family:'Shippori Mincho',serif; font-size:17px; margin:0 0 16px; color:var(--ink);}
+  .field{margin-bottom:14px;}
+  .field label{display:block; font-size:12px; color:var(--ink-soft); margin-bottom:5px; font-weight:700;}
+  .field input, .field textarea, .field select{
+    width:100%; padding:10px 12px; border:1px solid var(--line-strong); border-radius:3px;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:14.5px; background:var(--bg); color:var(--ink);
+  }
+  .field textarea{resize:vertical; min-height:64px;}
+  .field input:focus, .field textarea:focus, .field select:focus{outline:none; border-color:var(--accent);}
+  .field .hint{font-size:11px; color:var(--ink-soft); margin-top:4px;}
+  .modal-actions{display:flex; gap:10px; margin-top:18px;}
+  .modal-actions button{
+    flex:1; padding:12px; border-radius:3px; border:none; font-weight:700; cursor:pointer;
+    font-family:'Zen Kaku Gothic New',sans-serif; font-size:14px;
+  }
+  .btn-primary{background:var(--accent); color:#0E1826;}
+  .btn-ghost{background:transparent; border:1px solid var(--line-strong) !important; color:var(--ink-soft);}
+  .btn-danger{background:transparent; color:var(--red); border:1px solid var(--red) !important;}
+
+  .detail-history{margin-top:6px;}
+  .detail-total{font-size:12.5px; color:var(--gold); font-weight:700; margin:-6px 0 14px;}
+
+  .settings-link{text-align:center; margin-top:26px;}
+  .settings-link button{
+    background:none; border:none; color:var(--ink-soft); font-size:12px; text-decoration:underline;
+    cursor:pointer; font-family:'Zen Kaku Gothic New',sans-serif;
+  }
+
+  ::-webkit-scrollbar{width:0;height:0;}
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="top">
+    <div class="stamp">И</div>
+    <h1 class="logo-font">изучение</h1>
+    <div class="tagline">論点想起ノート</div>
+    <div class="date" id="todayLabel"></div>
+  </header>
+
+  <nav class="tabs">
+    <button data-view="today" class="active">今日</button>
+    <button data-view="calendar">カレンダー</button>
+    <button data-view="topics">論点一覧</button>
+    <button data-view="stats">統計</button>
+  </nav>
+
+  <main>
+    <section class="view active" id="view-today"></section>
+    <section class="view" id="view-calendar"></section>
+    <section class="view" id="view-topics"></section>
+    <section class="view" id="view-stats"></section>
+  </main>
+</div>
+
+<button class="fab" id="fabAdd" title="今日の学習を記録">＋</button>
+
+<!-- 記録モーダル -->
+<div class="modal-backdrop" id="modalRecord">
+  <div class="modal">
+    <h3>今日の学習を記録</h3>
+    <div class="field">
+      <label>科目</label>
+      <input list="subjectNames" id="inputSubject" placeholder="例）監査論" required>
+      <datalist id="subjectNames"></datalist>
+    </div>
+    <div class="field">
+      <label>論点</label>
+      <input list="topicNames" id="inputTopicName" placeholder="例）内部統制の限界">
+      <datalist id="topicNames"></datalist>
+      <div class="hint">既存の論点名を選ぶと同じタグに追記されます。新しい名前なら新規作成されます。</div>
+    </div>
+    <div class="field">
+      <label>今日の内容メモ</label>
+      <textarea id="inputMemo" placeholder="短くてOK。例）共謀には内部統制は対応できない、という切り口で出題された"></textarea>
+    </div>
+    <div class="field">
+      <label>学習時間（分・任意）</label>
+      <input type="number" id="inputMinutes" placeholder="例）35" min="0" inputmode="numeric">
+    </div>
+    <div class="field">
+      <label>教材・出典（任意）</label>
+      <input list="materialNames" id="inputMaterial" placeholder="例）グレ答2周目 問3">
+      <datalist id="materialNames"></datalist>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelRecord">キャンセル</button>
+      <button class="btn-primary" id="saveRecord">記録する</button>
+    </div>
+  </div>
+</div>
+
+<!-- 論点詳細モーダル -->
+<div class="modal-backdrop" id="modalDetail">
+  <div class="modal">
+    <h3 id="detailTitle"></h3>
+    <div class="detail-total" id="detailTotal"></div>
+    <div class="detail-history" id="detailHistory"></div>
+    <div class="modal-actions">
+      <button class="btn-danger" id="deleteTopicBtn">この論点をすべて削除</button>
+      <button class="btn-ghost" id="closeDetailBtn">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<!-- 設定モーダル -->
+<div class="modal-backdrop" id="modalSettings">
+  <div class="modal">
+    <h3>復習間隔の設定</h3>
+    <div class="field">
+      <label>間隔（日数・カンマ区切り、左から順に適用）</label>
+      <input id="inputIntervals" placeholder="3,7,30,90,180">
+      <div class="hint">「できた」を押すたびに右へ進みます。「忘れてた」は最初の間隔に戻ります。</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="cancelSettings">閉じる</button>
+      <button class="btn-primary" id="saveSettings">保存</button>
+    </div>
+
+    <h2 class="section-title">データのバックアップ</h2>
+    <div class="field">
+      <div class="hint">記録はこの端末のブラウザ内にのみ保存されています。機種変更やブラウザのデータ削除に備えて、定期的にエクスポートしておくことをおすすめします。</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="exportDataBtn">エクスポート（JSON保存）</button>
+      <button class="btn-ghost" id="importDataBtn">インポート</button>
+    </div>
+    <input type="file" id="importFileInput" accept="application/json" style="display:none;">
+
+    <h2 class="section-title">データの削除</h2>
+    <div class="modal-actions">
+      <button class="btn-danger" id="clearAllBtn">全データを削除する</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  const STORE_KEY = "izuchenie_v1";
+  const DEFAULT_INTERVALS = [3,7,30,90,180];
+
+  function loadState(){
+    try{
+      const raw = localStorage.getItem(STORE_KEY);
+      if(raw) return JSON.parse(raw);
+      // 旧バージョン（想起帳）からの引き継ぎ
+      const legacy = localStorage.getItem("soukicho_v1");
+      if(legacy) return JSON.parse(legacy);
+    }catch(e){}
+    return {topics:[], memos:[], intervals: DEFAULT_INTERVALS.slice()};
+  }
+  function saveState(){
+    localStorage.setItem(STORE_KEY, JSON.stringify(state));
+  }
+  const state = loadState();
+  if(!state.intervals || !state.intervals.length) state.intervals = DEFAULT_INTERVALS.slice();
+
+  const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+  const nowTs = () => Date.now(); // 更新日時（将来の同期・競合解決のための下地。現時点では表示等には未使用）
+  const pad2 = (n) => String(n).padStart(2,"0");
+  const toDateStr = (d) => `${d.getFullYear()}-${pad2(d.getMonth()+1)}-${pad2(d.getDate())}`;
+  const todayStr = () => toDateStr(new Date()); // 端末のローカル時刻基準
+  const addDays = (dateStr, n) => {
+    const [y,m,d] = dateStr.split("-").map(Number);
+    const dt = new Date(y, m-1, d);
+    dt.setDate(dt.getDate()+n);
+    return toDateStr(dt);
+  };
+  const daysBetween = (a,b) => Math.round((new Date(b+"T00:00:00") - new Date(a+"T00:00:00"))/86400000);
+  const fmtJP = (dateStr) => {
+    const d = new Date(dateStr+"T00:00:00");
+    return `${d.getMonth()+1}月${d.getDate()}日`;
+  };
+  const fmtHM = (min) => min>=60 ? `${Math.floor(min/60)}時間${min%60?min%60+"分":""}` : `${min}分`;
+  const relLabel = (dateStr) => {
+    const diff = daysBetween(dateStr, todayStr());
+    if(diff===0) return "今日";
+    if(diff>0) return diff+"日前";
+    return Math.abs(diff)+"日後";
+  };
+
+  document.getElementById("todayLabel").textContent =
+    new Date().toLocaleDateString("ja-JP",{year:"numeric",month:"long",day:"numeric",weekday:"short"});
+
+  document.querySelectorAll("nav.tabs button").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+      document.querySelectorAll("section.view").forEach(v=>v.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("view-"+btn.dataset.view).classList.add("active");
+      render();
+    });
+  });
+
+  function getTopicMemos(topicId){
+    return state.memos.filter(m=>m.topicId===topicId).sort((a,b)=>a.date<b.date?1:-1);
+  }
+  function topicTotalMinutes(topicId){
+    return state.memos.filter(m=>m.topicId===topicId).reduce((s,m)=>s+(m.minutes||0),0);
+  }
+
+  function addOrAppendTopic({name, subject, memoText, material, minutes}){
+    name = name.trim();
+    subject = (subject||"").trim();
+    if(!name) return;
+    let topic = state.topics.find(t=>t.name===name && (t.subject||"")===subject);
+    if(!topic){
+      topic = { id: uid(), name, subject, createdAt: todayStr(), updatedAt: nowTs() };
+      state.topics.push(topic);
+    }
+    const mins = parseInt(minutes,10);
+    // 入力（学習セッション）ごとに、想起設定（復習スケジュール）を個別に持たせる
+    const entry = {
+      id: uid(), topicId: topic.id, date: todayStr(),
+      text: (memoText||"").trim(), material: (material||"").trim(), minutes: (mins>0?mins:0),
+      stage: 0, nextReviewDate: addDays(todayStr(), state.intervals[0]),
+      lastResult: null, lastReviewedOn: null,
+      updatedAt: nowTs()
+    };
+    state.memos.push(entry);
+    topic.updatedAt = nowTs();
+    saveState();
+  }
+
+  function applyAssessment(entry, result){
+    const iv = state.intervals;
+    if(result==="good"){
+      entry.stage = Math.min(entry.stage+1, iv.length-1);
+      entry.nextReviewDate = addDays(todayStr(), iv[entry.stage]);
+    } else if(result==="soso"){
+      entry.nextReviewDate = addDays(todayStr(), Math.max(1, Math.round(iv[entry.stage]/2)) || 2);
+    } else {
+      entry.stage = 0;
+      entry.nextReviewDate = addDays(todayStr(), 1);
+    }
+    entry.lastResult = result;
+    entry.lastReviewedOn = todayStr();
+    entry.updatedAt = nowTs();
+    saveState();
+  }
+
+  // 復習間隔リストが短く変更された等で範囲外になった stage を丸める。
+  // （範囲外だと次の自己評価時に intervals[stage] が undefined になり計算が壊れる）
+  function clampStages(){
+    const maxStage = Math.max(0, state.intervals.length - 1);
+    let changed = false;
+    state.memos.forEach(m=>{
+      if(typeof m.stage !== "number" || isNaN(m.stage)){ m.stage = 0; changed = true; }
+      else if(m.stage > maxStage){ m.stage = maxStage; changed = true; }
+      else if(m.stage < 0){ m.stage = 0; changed = true; }
+    });
+    return changed;
+  }
+
+  function memoItemHtml(m){
+    return `<div class="memo-item"><div class="memo-date">${fmtJP(m.date)}${m.minutes?`・${m.minutes}分`:""}</div>${m.text?esc(m.text):"<span style=\"color:var(--ink-soft);\">（時間のみ記録）</span>"}${m.material?`<div class="memo-material">${esc(m.material)}</div>`:""}</div>`;
+  }
+  function entryDetailItemHtml(m){
+    const badgeText = {good:"できた", soso:"怪しい", forgot:"忘れてた"}[m.lastResult] || "";
+    return `<div class="memo-item">
+      <div class="memo-date">${fmtJP(m.date)}${m.minutes?`・${m.minutes}分`:""}${m.lastResult?` <span class="done-badge ${m.lastResult}">${badgeText}</span>`:""}</div>
+      ${m.text?esc(m.text):"<span style=\"color:var(--ink-soft);\">（時間のみ記録）</span>"}
+      ${m.material?`<div class="memo-material">${esc(m.material)}</div>`:""}
+      <div class="entry-schedule">
+        <span>次回復習：</span>
+        <input type="date" class="entry-next-date" data-entry="${m.id}" value="${m.nextReviewDate||""}">
+        <button class="entry-delete" data-entry="${m.id}">削除</button>
+      </div>
+    </div>`;
+  }
+  function topicLabelHtml(t){
+    return t.subject
+      ? `<span class="subj-part">${esc(t.subject)}</span> <span class="topic-part-paren">(${esc(t.name)})</span>`
+      : `<span class="topic-part">${esc(t.name)}</span>`;
+  }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  // ---- 「今日」ビュー ----
+  function renderToday(){
+    const el = document.getElementById("view-today");
+    const today = todayStr();
+    const due = state.memos.filter(m => m.nextReviewDate && m.nextReviewDate <= today && m.lastReviewedOn !== today);
+    const doneToday = state.memos.filter(m => m.lastReviewedOn === today);
+    const todayMinutes = state.memos.filter(m=>m.date===today).reduce((s,m)=>s+(m.minutes||0),0);
+
+    let html = "";
+    if(todayMinutes>0){
+      html += `<div class="stat-grid" style="margin-bottom:18px;"><div class="stat-box"><div class="num">${fmtHM(todayMinutes)}</div><div class="label">今日の学習時間</div></div></div>`;
+    }
+    if(due.length===0 && doneToday.length===0){
+      html += `<div class="empty"><span class="glyph">И</span>今日復習すべき記録はありません。<br>右下の＋から今日の学習を記録しましょう。</div>`;
+    }
+
+    if(due.length){
+      html += `<h2 class="section-title">今日の復習（${due.length}）</h2>`;
+      due.sort((a,b)=> a.nextReviewDate<b.nextReviewDate?-1:1);
+      due.forEach(m=>{
+        const topic = state.topics.find(t=>t.id===m.topicId);
+        html += `
+        <div class="review-card" data-id="${m.id}">
+          <div class="review-head" data-action="toggle">
+            <div>
+              <div class="topic-name">${topic?topicLabelHtml(topic):"（削除済みの論点）"}</div>
+              <div class="meta">${fmtJP(m.date)}に学習${m.material?`・${esc(m.material)}`:""}</div>
+            </div>
+            <div class="chevron">▸</div>
+          </div>
+          <div class="review-body">
+            <div class="prompt-veil">
+              <p>まず論点名だけを見て、内容を思い出してみましょう。</p>
+              <button class="btn-recall" data-action="reveal">思い出す（メモを開く）</button>
+            </div>
+            <div class="memo-list">
+              ${memoItemHtml(m)}
+            </div>
+            <div class="assess-row">
+              <button class="good" data-action="good">できた</button>
+              <button class="soso" data-action="soso">怪しい</button>
+              <button class="forgot" data-action="forgot">忘れてた</button>
+            </div>
+          </div>
+        </div>`;
+      });
+    }
+
+    if(doneToday.length){
+      html += `<h2 class="section-title">本日完了（${doneToday.length}）</h2>`;
+      doneToday.forEach(m=>{
+        const topic = state.topics.find(t=>t.id===m.topicId);
+        const badgeText = {good:"できた", soso:"怪しい", forgot:"忘れてた"}[m.lastResult] || "";
+        html += `<div class="topic-row" data-detail="${m.topicId}">
+          <div class="row-top">
+            <span class="topic-name">${topic?topicLabelHtml(topic):"（削除済みの論点）"}<span class="done-badge ${m.lastResult}">${badgeText}</span></span>
+            <span class="next-date">次回 ${fmtJP(m.nextReviewDate)}</span>
+          </div>
+          ${m.material?`<div class="next-date" style="margin-top:4px;">${esc(m.material)}</div>`:""}
+        </div>`;
+      });
+    }
+
+    el.innerHTML = html;
+
+    el.querySelectorAll(".review-head").forEach(h=>{
+      h.addEventListener("click", ()=> h.closest(".review-card").classList.toggle("open"));
+    });
+    el.querySelectorAll('[data-action="reveal"]').forEach(b=>{
+      b.addEventListener("click", (e)=>{ e.stopPropagation(); b.closest(".review-card").classList.add("revealed"); });
+    });
+    el.querySelectorAll('.assess-row button').forEach(b=>{
+      b.addEventListener("click", (e)=>{
+        e.stopPropagation();
+        const card = b.closest(".review-card");
+        const entry = state.memos.find(m=>m.id===card.dataset.id);
+        applyAssessment(entry, b.dataset.action);
+        renderToday();
+      });
+    });
+    el.querySelectorAll("[data-detail]").forEach(row=>{
+      row.addEventListener("click", ()=> openDetail(row.dataset.detail));
+    });
+  }
+
+  // ---- 「カレンダー」ビュー ----
+  let calYear, calMonth, calSelectedDate;
+  (function initCal(){
+    const now = new Date();
+    calYear = now.getFullYear(); calMonth = now.getMonth(); calSelectedDate = todayStr();
+  })();
+
+  function renderCalendar(){
+    const el = document.getElementById("view-calendar");
+    const first = new Date(calYear, calMonth, 1);
+    const startWeekday = first.getDay();
+    const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+    const dow = ["日","月","火","水","木","金","土"];
+    const today = todayStr();
+
+    const minutesByDate = {};
+    state.memos.forEach(m=>{ minutesByDate[m.date] = (minutesByDate[m.date]||0)+(m.minutes||0); });
+    const hasEntryByDate = {};
+    state.memos.forEach(m=>{ hasEntryByDate[m.date] = true; });
+    const dueByDate = {}; // 日付 → その日が次回復習日（確定）のエントリ一覧
+    const forecastByDate = {}; // 日付 → その日が復習予定の見込み（未確定）のエントリ一覧
+    state.memos.forEach(m=>{
+      if(!m.nextReviewDate) return;
+      if(!dueByDate[m.nextReviewDate]) dueByDate[m.nextReviewDate] = [];
+      dueByDate[m.nextReviewDate].push(m);
+      // 順調に「できた」を続けた場合の、この先の見込みスケジュール
+      const iv = state.intervals;
+      let cursor = m.nextReviewDate;
+      let stage = m.stage;
+      while(stage < iv.length-1){
+        stage++;
+        cursor = addDays(cursor, iv[stage]);
+        if(!forecastByDate[cursor]) forecastByDate[cursor] = [];
+        forecastByDate[cursor].push(m);
+      }
+    });
+
+    let cells = "";
+    for(let i=0;i<startWeekday;i++) cells += `<div class="cal-cell blank"></div>`;
+    for(let d=1; d<=daysInMonth; d++){
+      const dateStr = `${calYear}-${pad2(calMonth+1)}-${pad2(d)}`;
+      const classes = ["cal-cell"];
+      if(hasEntryByDate[dateStr]) classes.push("has-entry");
+      if(dateStr===today) classes.push("today");
+      if(dateStr===calSelectedDate) classes.push("selected");
+      const dots = (hasEntryByDate[dateStr]?'<span class="dot"></span>':'') + (dueByDate[dateStr]?'<span class="dot dot-due"></span>':'') + (forecastByDate[dateStr]?'<span class="dot dot-forecast"></span>':'');
+      cells += `<div class="${classes.join(" ")}" data-date="${dateStr}">${d}<span class="dot-row">${dots}</span></div>`;
+    }
+
+    let html = `
+      <div class="cal-nav">
+        <button id="calPrev">‹</button>
+        <div class="cal-label">${calYear}年 ${calMonth+1}月</div>
+        <button id="calNext">›</button>
+      </div>
+      <div class="cal-grid">
+        ${dow.map(w=>`<div class="cal-dow">${w}</div>`).join("")}
+        ${cells}
+      </div>
+      <div class="heat-caption" style="text-align:left; margin-bottom:14px;"><span class="dot" style="display:inline-block; vertical-align:middle;"></span> 学習した日　<span class="dot dot-due" style="display:inline-block; vertical-align:middle;"></span> 復習予定日（確定）　<span class="dot dot-forecast" style="display:inline-block; vertical-align:middle;"></span> この先の見込み</div>
+    `;
+
+    const selMemos = state.memos.filter(m=>m.date===calSelectedDate).sort((a,b)=> a.id<b.id?-1:1);
+    const selTotal = selMemos.reduce((s,m)=>s+(m.minutes||0),0);
+    const selDue = dueByDate[calSelectedDate] || [];
+    const selForecast = (forecastByDate[calSelectedDate] || []).filter(m=>!selDue.includes(m));
+
+    html += `<div class="cal-detail">
+      <div class="cal-detail-date">${fmtJP(calSelectedDate)}${calSelectedDate===today?"（今日）":""}</div>`;
+
+    if(selDue.length){
+      html += `<h2 class="section-title" style="margin-top:2px;">この日に復習予定（${selDue.length}）</h2>`;
+      html += selDue.map(m=>{
+        const topic = state.topics.find(t=>t.id===m.topicId);
+        return `<div class="cal-entry">
+          <div class="ce-head"><span>${topic?topicLabelHtml(topic):"（削除済みの論点）"}</span></div>
+          ${m.text ? `<div class="ce-text">前回：${esc(m.text)}</div>` : (m.material?`<div class="ce-text">${esc(m.material)}</div>`:"")}
+        </div>`;
+      }).join("");
+    }
+
+    if(selForecast.length){
+      html += `<h2 class="section-title" style="margin-top:18px;">この先の見込み（未確定・${selForecast.length}）</h2>`;
+      html += `<div class="cal-entry" style="color:var(--ink-soft); font-size:12px;">順調に「できた」が続いた場合の目安です。手前の復習結果次第で変わります。</div>`;
+      html += selForecast.map(m=>{
+        const topic = state.topics.find(t=>t.id===m.topicId);
+        return `<div class="cal-entry"><div class="ce-head"><span>${topic?topicLabelHtml(topic):"（削除済みの論点）"}</span></div></div>`;
+      }).join("");
+    }
+
+    html += `<h2 class="section-title" style="margin-top:${selDue.length?"18px":"2px"};">この日の学習記録${selTotal>0?`（合計 ${fmtHM(selTotal)}）`:""}</h2>`;
+    html += selMemos.length===0
+        ? `<div class="cal-entry" style="color:var(--ink-soft);">この日の記録はありません</div>`
+        : selMemos.map(m=>{
+            const topic = state.topics.find(t=>t.id===m.topicId);
+            return `<div class="cal-entry">
+              <div class="ce-head"><span>${topic?topicLabelHtml(topic):"（削除済みの論点）"}</span><span class="ce-time">${m.minutes?fmtHM(m.minutes):""}</span></div>
+              ${m.text?`<div class="ce-text">${esc(m.text)}</div>`:""}
+            </div>`;
+          }).join("");
+    html += `</div>`;
+
+    el.innerHTML = html;
+    document.getElementById("calPrev").addEventListener("click", ()=>{
+      calMonth--; if(calMonth<0){calMonth=11; calYear--;} renderCalendar();
+    });
+    document.getElementById("calNext").addEventListener("click", ()=>{
+      calMonth++; if(calMonth>11){calMonth=0; calYear++;} renderCalendar();
+    });
+    el.querySelectorAll(".cal-cell:not(.blank)").forEach(c=>{
+      c.addEventListener("click", ()=>{ calSelectedDate = c.dataset.date; renderCalendar(); });
+    });
+  }
+
+  // ---- 「論点一覧」ビュー ----
+  function renderTopics(){
+    const el = document.getElementById("view-topics");
+    let search = document.getElementById("topicSearch");
+
+    // 検索バーとリスト用コンテナは初回のみ生成。以降はリストだけ差し替えるので、
+    // 入力欄が作り直されずフォーカス・カーソル位置・IME変換中の状態が保たれる。
+    if(!search){
+      el.innerHTML = `<input class="search-bar" id="topicSearch" placeholder="論点・科目で検索"><div id="topicList"></div>`;
+      search = document.getElementById("topicSearch");
+      search.addEventListener("input", renderTopics);
+    }
+
+    const q = search.value.trim();
+    let list = state.topics.slice();
+    if(q){
+      list = list.filter(t => t.name.includes(q) || (t.subject||"").includes(q));
+    }
+    // 直近の次回復習日（複数エントリのうち最も早いもの）で並べ替え
+    const soonest = (t) => {
+      const dates = getTopicMemos(t.id).map(m=>m.nextReviewDate).filter(Boolean).sort();
+      return dates[0] || "9999-99-99";
+    };
+    list.sort((a,b)=> soonest(a)<soonest(b)?-1:1);
+
+    let html = "";
+    if(list.length===0){
+      html += `<div class="empty"><span class="glyph">И</span>${q?"該当する論点がありません。":"まだ論点がありません。"}</div>`;
+    } else {
+      list.forEach(t=>{
+        const entries = getTopicMemos(t.id);
+        const total = topicTotalMinutes(t.id);
+        const upcoming = entries.map(e=>e.nextReviewDate).filter(Boolean).sort();
+        const nextLabel = upcoming.length
+          ? `次回 ${fmtJP(upcoming[0])}${upcoming.length>1?` 他${upcoming.length-1}件`:""}`
+          : "";
+        html += `<div class="topic-row" data-detail="${t.id}">
+          <div class="row-top">
+            <span class="topic-name">${topicLabelHtml(t)}</span>
+            <span class="next-date">${nextLabel}</span>
+          </div>
+          <div class="row-sub">
+            <span class="next-date">メモ${entries.length}件</span>
+            <span class="topic-total-time">${total>0?fmtHM(total):"時間未記録"}</span>
+          </div>
+        </div>`;
+      });
+    }
+    const listEl = document.getElementById("topicList");
+    listEl.innerHTML = html;
+    listEl.querySelectorAll("[data-detail]").forEach(row=>{
+      row.addEventListener("click", ()=> openDetail(row.dataset.detail));
+    });
+  }
+
+  // ---- 「統計」ビュー ----
+  let statsSubjectFilter = "";
+
+  function renderRankingGroups(ranking, filterActive){
+    // 科目ごとにグループ化し、行には論点名のみ（科目名の重複表示を避ける）
+    const groups = {};
+    ranking.forEach(r=>{
+      const key = r.subject || "（科目未設定）";
+      if(!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+    const groupKeys = Object.keys(groups).sort((a,b)=>{
+      const ta = groups[a].reduce((s,r)=>s+r.total,0);
+      const tb = groups[b].reduce((s,r)=>s+r.total,0);
+      return tb-ta;
+    });
+    return groupKeys.map(key=>{
+      const rows = groups[key].slice().sort((a,b)=>b.total-a.total);
+      const groupTotal = rows.reduce((s,r)=>s+r.total,0);
+      return `<div class="topic-row" style="cursor:default; margin-bottom:12px;">
+        <div class="ranking-row" style="border-bottom:1px solid var(--line-strong);">
+          <span class="r-name" style="color:var(--gold);">${filterActive?"合計":esc(key)}</span>
+          <span class="r-time">${fmtHM(groupTotal)}</span>
+        </div>
+        ${rows.map((r,i)=>`<div class="ranking-row"><span class="r-name">${i+1}. ${esc(r.name)}</span><span class="r-time">${fmtHM(r.total)}</span></div>`).join("")}
+      </div>`;
+    }).join("");
+  }
+
+  function renderStats(){
+    const el = document.getElementById("view-stats");
+    const totalTopics = state.topics.length;
+    const totalMinutes = state.memos.reduce((s,m)=>s+(m.minutes||0),0);
+    const weekStart = addDays(todayStr(), -6);
+    const weekMinutes = state.memos.filter(m=>m.date>=weekStart).reduce((s,m)=>s+(m.minutes||0),0);
+
+    const days = [];
+    for(let i=27;i>=0;i--) days.push(addDays(todayStr(), -i));
+    const minutesByDay = {};
+    state.memos.forEach(m=>{ minutesByDay[m.date] = (minutesByDay[m.date]||0)+(m.minutes||0); });
+
+    const subjects = [...new Set(state.topics.map(t=>t.subject).filter(Boolean))].sort();
+
+    let ranking = state.topics
+      .map(t=>({name:t.name, subject:t.subject, total: topicTotalMinutes(t.id)}))
+      .filter(r=>r.total>0);
+    if(statsSubjectFilter) ranking = ranking.filter(r=>r.subject===statsSubjectFilter);
+    ranking.sort((a,b)=> b.total-a.total);
+    const rankingTotal = ranking.reduce((s,r)=>s+r.total,0);
+
+    let html = `
+      <div class="stat-grid">
+        <div class="stat-box"><div class="num">${totalTopics}</div><div class="label">論点数</div></div>
+        <div class="stat-box"><div class="num" style="font-size:18px;">${fmtHM(totalMinutes)}</div><div class="label">総学習時間</div></div>
+        <div class="stat-box"><div class="num" style="font-size:18px;">${fmtHM(weekMinutes)}</div><div class="label">今週の学習時間</div></div>
+      </div>
+      <h2 class="section-title">論点別 学習時間</h2>
+      ${subjects.length ? `
+      <select class="search-bar" id="statsSubjectSelect" style="margin-bottom:12px;">
+        <option value="">すべての科目（論点単位で全件表示）</option>
+        ${subjects.map(s=>`<option value="${esc(s)}" ${s===statsSubjectFilter?"selected":""}>${esc(s)}のみ</option>`).join("")}
+      </select>` : ""}
+      ${ranking.length? renderRankingGroups(ranking, statsSubjectFilter) : `<div class="empty" style="padding:24px;">学習時間が記録された論点がありません。</div>`}
+      <h2 class="section-title">直近28日の学習時間</h2>
+      <div class="heatmap">
+        ${days.map(d=>{
+          const m = minutesByDay[d]||0;
+          const level = m===0?0:m<30?1:m<60?2:m<120?3:4;
+          return `<div class="heat-cell" data-level="${level}" title="${fmtJP(d)}：${m}分"></div>`;
+        }).join("")}
+      </div>
+      <div class="heat-caption">濃いほど学習時間が長い日</div>
+      <div class="settings-link"><button id="openSettings">復習間隔の設定を変更する</button></div>
+    `;
+    el.innerHTML = html;
+    document.getElementById("openSettings").addEventListener("click", openSettings);
+    const sel = document.getElementById("statsSubjectSelect");
+    if(sel) sel.addEventListener("change", (e)=>{ statsSubjectFilter = e.target.value; renderStats(); });
+  }
+
+  function activeView(){
+    const btn = document.querySelector("nav.tabs button.active");
+    return btn ? btn.dataset.view : "today";
+  }
+  let lastRenderedDay = todayStr();
+  function render(){
+    lastRenderedDay = todayStr();
+    // アクティブなビューだけ描画する（他ビューは切替時に render() が呼ばれて更新される）
+    switch(activeView()){
+      case "calendar": renderCalendar(); break;
+      case "topics":   renderTopics();   break;
+      case "stats":    renderStats();    break;
+      default:         renderToday();
+    }
+  }
+  // 日付が変わったら自動で再描画（開きっぱなし・バックグラウンド復帰の両対応）
+  function refreshIfDayChanged(){
+    if(todayStr() !== lastRenderedDay) render();
+  }
+  document.addEventListener("visibilitychange", ()=>{ if(!document.hidden) refreshIfDayChanged(); });
+  window.addEventListener("focus", refreshIfDayChanged);
+  setInterval(refreshIfDayChanged, 60000);
+
+  // ---- 記録モーダル ----
+  const modalRecord = document.getElementById("modalRecord");
+  document.getElementById("fabAdd").addEventListener("click", ()=>{
+    document.getElementById("inputTopicName").value = "";
+    document.getElementById("inputSubject").value = "";
+    document.getElementById("inputMemo").value = "";
+    document.getElementById("inputMinutes").value = "";
+    document.getElementById("inputMaterial").value = "";
+    const dl = document.getElementById("topicNames");
+    dl.innerHTML = state.topics.map(t=>`<option value="${esc(t.name)}">`).join("");
+    const subjSet = [...new Set(state.topics.map(t=>t.subject).filter(Boolean))];
+    document.getElementById("subjectNames").innerHTML = subjSet.map(s=>`<option value="${esc(s)}">`).join("");
+    const materialSet = [...new Set(state.memos.map(m=>m.material).filter(Boolean))];
+    document.getElementById("materialNames").innerHTML = materialSet.map(s=>`<option value="${esc(s)}">`).join("");
+    modalRecord.classList.add("open");
+    setTimeout(()=>document.getElementById("inputTopicName").focus(), 50);
+  });
+  document.getElementById("cancelRecord").addEventListener("click", ()=> modalRecord.classList.remove("open"));
+  document.getElementById("saveRecord").addEventListener("click", ()=>{
+    const subject = document.getElementById("inputSubject").value;
+    const name = document.getElementById("inputTopicName").value;
+    if(!subject.trim()){ document.getElementById("inputSubject").focus(); return; }
+    if(!name.trim()){ document.getElementById("inputTopicName").focus(); return; }
+    addOrAppendTopic({
+      name,
+      subject,
+      memoText: document.getElementById("inputMemo").value,
+      material: document.getElementById("inputMaterial").value,
+      minutes: document.getElementById("inputMinutes").value
+    });
+    modalRecord.classList.remove("open");
+    render();
+  });
+
+  // ---- 詳細モーダル ----
+  const modalDetail = document.getElementById("modalDetail");
+  let currentDetailId = null;
+  function openDetail(id){
+    const topic = state.topics.find(t=>t.id===id);
+    if(!topic) return;
+    currentDetailId = id;
+    document.getElementById("detailTitle").innerHTML = topicLabelHtml(topic);
+    const total = topicTotalMinutes(id);
+    document.getElementById("detailTotal").textContent = total>0 ? `累計学習時間 ${fmtHM(total)}` : "累計学習時間 未記録";
+    const entries = getTopicMemos(id);
+    document.getElementById("detailHistory").innerHTML =
+      `<h2 class="section-title" style="margin-top:0;">記録履歴（${entries.length}件・入力ごとに個別の想起設定）</h2>` +
+      (entries.map(entryDetailItemHtml).join("")
+        || `<div class="memo-item">メモがありません</div>`);
+    document.querySelectorAll(".entry-next-date").forEach(inp=>{
+      inp.addEventListener("change", (e)=>{
+        const entry = state.memos.find(m=>m.id===e.target.dataset.entry);
+        if(entry && e.target.value){
+          entry.nextReviewDate = e.target.value;
+          entry.updatedAt = nowTs();
+          saveState();
+        }
+      });
+    });
+    document.querySelectorAll(".entry-delete").forEach(btn=>{
+      btn.addEventListener("click", ()=>{
+        if(!confirm("この記録を削除しますか？（この記録に紐づく想起設定も削除されます）")) return;
+        state.memos = state.memos.filter(m=>m.id!==btn.dataset.entry);
+        saveState();
+        openDetail(id);
+        render();
+      });
+    });
+    modalDetail.classList.add("open");
+  }
+  document.getElementById("closeDetailBtn").addEventListener("click", ()=>{
+    modalDetail.classList.remove("open");
+    render();
+  });
+  document.getElementById("deleteTopicBtn").addEventListener("click", ()=>{
+    if(!confirm("この論点と関連する記録・想起設定をすべて削除しますか？")) return;
+    state.topics = state.topics.filter(t=>t.id!==currentDetailId);
+    state.memos = state.memos.filter(m=>m.topicId!==currentDetailId);
+    saveState();
+    modalDetail.classList.remove("open");
+    render();
+  });
+  [modalRecord, modalDetail].forEach(m=>{
+    m.addEventListener("click", (e)=>{ if(e.target===m) m.classList.remove("open"); });
+  });
+
+  // ---- 設定モーダル ----
+  const modalSettings = document.getElementById("modalSettings");
+  function openSettings(){
+    document.getElementById("inputIntervals").value = state.intervals.join(",");
+    modalSettings.classList.add("open");
+  }
+  document.getElementById("cancelSettings").addEventListener("click", ()=> modalSettings.classList.remove("open"));
+  document.getElementById("saveSettings").addEventListener("click", ()=>{
+    const raw = document.getElementById("inputIntervals").value;
+    const parsed = raw.split(",").map(s=>parseInt(s.trim(),10)).filter(n=>!isNaN(n) && n>0);
+    if(parsed.length){ state.intervals = parsed; clampStages(); saveState(); }
+    modalSettings.classList.remove("open");
+    render();
+  });
+  modalSettings.addEventListener("click", (e)=>{ if(e.target===modalSettings) modalSettings.classList.remove("open"); });
+
+  // ---- エクスポート／インポート／全削除 ----
+  document.getElementById("exportDataBtn").addEventListener("click", ()=>{
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `izuchenie_export_${todayStr()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  const importFileInput = document.getElementById("importFileInput");
+  document.getElementById("importDataBtn").addEventListener("click", ()=> importFileInput.click());
+  importFileInput.addEventListener("change", (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const imported = JSON.parse(reader.result);
+        if(!imported || !Array.isArray(imported.topics) || !Array.isArray(imported.memos)){
+          alert("ファイルの形式が正しくありません。");
+          return;
+        }
+        if(!confirm("現在のデータを、インポートしたデータで置き換えます。よろしいですか？")) return;
+        state.topics = imported.topics;
+        state.memos = imported.memos;
+        state.intervals = imported.intervals && imported.intervals.length ? imported.intervals : DEFAULT_INTERVALS.slice();
+        migrateIfNeeded();
+        saveState();
+        modalSettings.classList.remove("open");
+        render();
+      }catch(err){
+        alert("ファイルの読み込みに失敗しました。");
+      }
+    };
+    reader.readAsText(file);
+    importFileInput.value = "";
+  });
+
+  document.getElementById("clearAllBtn").addEventListener("click", ()=>{
+    if(!confirm("すべての論点・記録・設定を削除します。この操作は取り消せません。よろしいですか？")) return;
+    state.topics = [];
+    state.memos = [];
+    state.intervals = DEFAULT_INTERVALS.slice();
+    saveState();
+    modalSettings.classList.remove("open");
+    render();
+  });
+
+  // ---- 旧バージョン（論点単位で復習スケジュールを保持していた形式）からの移行 ----
+  function migrateIfNeeded(){
+    let changed = false;
+    state.topics.forEach(t=>{
+      if(t.nextReviewDate !== undefined){
+        const entries = state.memos.filter(m=>m.topicId===t.id);
+        entries.forEach(m=>{
+          if(m.nextReviewDate===undefined){
+            m.stage = t.stage||0;
+            m.nextReviewDate = t.nextReviewDate;
+            m.lastResult = t.lastResult||null;
+            m.lastReviewedOn = t.lastReviewedOn||null;
+          }
+        });
+        delete t.stage; delete t.nextReviewDate; delete t.lastResult; delete t.lastReviewedOn;
+        changed = true;
+      }
+    });
+    // 想起設定を持たない旧メモには初期値を補完
+    state.memos.forEach(m=>{
+      if(m.nextReviewDate===undefined){
+        m.stage = 0;
+        m.nextReviewDate = addDays(m.date || todayStr(), state.intervals[0]);
+        m.lastResult = m.lastResult!==undefined ? m.lastResult : null;
+        m.lastReviewedOn = m.lastReviewedOn!==undefined ? m.lastReviewedOn : null;
+        changed = true;
+      }
+    });
+    if(clampStages()) changed = true;
+    if(changed) saveState();
+  }
+  migrateIfNeeded();
+
+  render();
+})();
+</script>
+</body>
+</html>
